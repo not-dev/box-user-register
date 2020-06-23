@@ -2,10 +2,7 @@ const fs = require('fs')
 
 // index作成対象のディレクトリ
 const targetDirs = [
-  './src/atoms',
-  './src/molecules',
-  './src/organisms',
-  './src/pages',
+  './src/contents',
   './src/theme'
 ]
 
