@@ -1,34 +1,31 @@
+import { Button } from '@material-ui/core'
 import { createStyles, makeStyles, styled, Theme } from '@material-ui/core/styles'
 import React from 'react'
 
-const Wrapper = styled('div')({
-  display: 'flex',
-  flexDirection: 'column'
-})
+const ExButton = styled(Button)(({ theme }) => ({
+  margin: theme.spacing(1)
+}))
 
 const useStyles = makeStyles((theme:Theme) => createStyles({
   root: {
-    width: '100vw',
-    height: '100vh',
-    backgroundColor: '#ccc',
-    padding: theme.spacing(5)
-  },
-  menu: {
-    backgroundColor: '#0000ff',
-    height: 240
-  },
-  dropzone: {
-    backgroundColor: '#00ff00',
-    flex: 1
+    backgroundColor: '#333',
+    padding: theme.spacing(1),
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end'
   }
 }))
 
 const Menu:React.FC = () => {
   const classes = useStyles()
-  console.log(classes, Wrapper)
 
   return (
-    <div></div>
+    <div className={classes.root}>
+      <ExButton variant='contained' color='primary'>
+        Create Users
+      </ExButton>
+    </div>
   )
 }
 
