@@ -1,30 +1,46 @@
 import { CssBaseline } from '@material-ui/core'
-import { createStyles, makeStyles, styled, StylesProvider, ThemeProvider } from '@material-ui/core/styles'
+import { createStyles, makeStyles, styled, StylesProvider, Theme, ThemeProvider } from '@material-ui/core/styles'
 import React from 'react'
 
-import { Dropzone } from '../contents'
+import { Dropzone, Menu } from '../contents'
 import { theme } from '../theme'
 
 const Wrapper = styled('div')({
-  height: '100vh',
   display: 'flex',
   flexDirection: 'column'
 })
 
-const useStyles = makeStyles(() => createStyles({
-
+const useStyles = makeStyles((theme:Theme) => createStyles({
+  root: {
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: '#ccc',
+    padding: theme.spacing(5)
+  },
+  menu: {
+    backgroundColor: '#0000ff',
+    height: 240
+  },
+  dropzone: {
+    backgroundColor: '#00ff00',
+    flex: 1
+  }
 }))
 
-const App:React.FC = (props) => {
+const App:React.FC = () => {
   const classes = useStyles({ theme })
-  console.log(props, classes)
 
   return (
     <StylesProvider injectFirst>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Wrapper>
-          <Dropzone/>
+        <Wrapper className={classes.root}>
+          <Wrapper className={classes.menu}>
+            <Menu/>
+          </Wrapper>
+          <Wrapper className={classes.dropzone}>
+            <Dropzone/>
+          </Wrapper>
         </Wrapper>
       </ThemeProvider>
     </StylesProvider>

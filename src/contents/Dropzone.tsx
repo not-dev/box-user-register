@@ -1,4 +1,4 @@
-import { styled } from '@material-ui/styles'
+import { createStyles, makeStyles, styled, Theme } from '@material-ui/core/styles'
 import React, { useCallback } from 'react'
 import { DropzoneRootProps, useDropzone } from 'react-dropzone'
 
@@ -31,7 +31,17 @@ const Container = styled('div')({
   transition: 'border .24s ease-in-out'
 })
 
-function Dropzone () {
+const useStyles = makeStyles((theme:Theme) => createStyles({
+  root: {
+    display: 'flex',
+    flex: 1,
+    padding: theme.spacing(2)
+  }
+}))
+
+const Dropzone:React.FC = () => {
+  const classes = useStyles()
+
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file:File) => {
       const reader = new FileReader()
@@ -57,7 +67,7 @@ function Dropzone () {
   } = useDropzone({ onDrop, accept: 'text/csv' })
 
   return (
-    <div className='container'>
+    <div className={classes.root}>
       <Container {...getRootProps({ isDragActive, isDragAccept, isDragReject })}>
         <input {...getInputProps()} />
         <p>Drag 'n' drop some files here, or click to select files</p>
