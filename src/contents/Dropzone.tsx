@@ -1,48 +1,54 @@
-import { createStyles, makeStyles, styled, Theme } from '@material-ui/core/styles'
-import React, { useCallback } from 'react'
-import { DropzoneRootProps, useDropzone } from 'react-dropzone'
 
-const getColor = (props:DropzoneRootProps) => {
-  if (props.isDragAccept) {
-    return '#00e676'
-  }
-  if (props.isDragReject) {
-    return '#ff1744'
-  }
-  if (props.isDragActive) {
-    return '#2196f3'
-  }
-  return '#eeeeee'
-}
-
-const Container = styled('div')({
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  padding: 20,
-  borderWidth: 2,
-  borderRadius: 2,
-  borderColor: (props:DropzoneRootProps) => getColor(props),
-  borderStyle: 'dashed',
-  backgroundColor: '#fafafa',
-  color: '#bdbdbd',
-  outline: 'none',
-  transition: 'border .24s ease-in-out'
-})
+import { Paper, Typography } from '@material-ui/core'
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline'
+import BlockIcon from '@material-ui/icons/Block'
+import clsx from 'clsx'
+import React from 'react'
+import ReactDropzone, { DropzoneState } from 'react-dropzone'
 
 const useStyles = makeStyles((theme:Theme) => createStyles({
   root: {
     display: 'flex',
     flex: 1,
     padding: theme.spacing(2)
+  },
+  base: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderRadius: theme.shape.borderRadius,
+    borderColor: theme.palette.divider,
+    borderStyle: 'dashed',
+    backgroundColor: 'transparent',
+    outline: 'none',
+    fontSize: 120,
+    color: theme.palette.text.secondary,
+    transition: theme.transitions.create(
+      ['all'],
+      { duration: theme.transitions.duration.short }
+    ),
+    '&:hover': {
+      backgroundColor: theme.palette.action.hover
+    }
+  },
+  accepted: {
+    borderColor: theme.palette.info.main,
+    backgroundColor: theme.palette.action.focus
+  },
+  rejected: {
+    borderColor: theme.palette.error.main,
+    backgroundColor: theme.palette.action.disabledBackground
   }
 }))
 
 const Dropzone:React.FC = () => {
   const classes = useStyles()
 
-  const onDrop = useCallback((acceptedFiles) => {
+  const callback = (acceptedFiles: Array<File>) => {
     acceptedFiles.forEach((file:File) => {
       const reader = new FileReader()
 
@@ -56,23 +62,31 @@ const Dropzone:React.FC = () => {
       }
       reader.readAsArrayBuffer(file)
     })
-  }, [])
-
-  const {
-    getRootProps,
-    getInputProps,
-    isDragActive,
-    isDragAccept,
-    isDragReject
-  } = useDropzone({ onDrop, accept: 'text/csv' })
+  }
 
   return (
-    <div className={classes.root}>
-      <Container {...getRootProps({ isDragActive, isDragAccept, isDragReject })}>
-        <input {...getInputProps()} />
-        <p>Drag 'n' drop some files here, or click to select files</p>
-      </Container>
-    </div>
+    <Paper className={classes.root}>
+      <ReactDropzone
+        onDrop={(acceptedFiles: Array<File>) => callback(acceptedFiles)}
+        accept='.csv, application/vnd.ms-excel'
+      >
+        {({ isDragAccept, isDragReject, getRootProps, getInputProps }:DropzoneState) => (
+          <div {...getRootProps({ className: clsx(classes.base, isDragAccept && classes.accepted, isDragReject && classes.rejected) })}>
+            <input {...getInputProps()} />
+            {isDragReject ? (
+              <BlockIcon fontSize='inherit'/>
+            )
+              : isDragAccept ? (
+                <AddCircleOutlineIcon fontSize='inherit'/>
+              )
+                : <Typography variant='h4' color='inherit'>
+                  Drag 'n' drop some files here, or click to select files
+                </Typography>
+            }
+          </div>
+        )}
+      </ReactDropzone>
+    </Paper>
   )
 }
 

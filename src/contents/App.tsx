@@ -14,15 +14,13 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
   root: {
     width: '100vw',
     height: '100vh',
-    backgroundColor: '#ccc',
     padding: theme.spacing(5)
   },
   menu: {
-    backgroundColor: '#0000ff',
-    height: 240
+    ...theme.mixins.toolbar,
+    marginBottom: theme.spacing(2)
   },
   dropzone: {
-    backgroundColor: '#00ff00',
     flex: 1
   }
 }))

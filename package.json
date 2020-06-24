@@ -13,7 +13,9 @@
     "@material-ui/icons": "^4.9.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-dropzone": "^11.0.1"
+    "react-dropzone": "^11.0.1",
+    "typeface-comfortaa": "^1.1.4",
+    "typeface-roboto": "0.0.75"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^4.2.4",

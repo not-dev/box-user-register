@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core'
+import { Button, Typography } from '@material-ui/core'
 import { createStyles, makeStyles, styled, Theme } from '@material-ui/core/styles'
 import React from 'react'
 
@@ -6,14 +6,20 @@ const ExButton = styled(Button)(({ theme }) => ({
   margin: theme.spacing(1)
 }))
 
+const Wrapper = styled('div')({
+  display: 'flex',
+  alignItems: 'center'
+})
+
 const useStyles = makeStyles((theme:Theme) => createStyles({
   root: {
-    backgroundColor: '#333',
-    padding: theme.spacing(1),
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+    flex: 1
+  },
+  title: {
     flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end'
+    justifyContent: 'flex-start'
   }
 }))
 
@@ -21,11 +27,18 @@ const Menu:React.FC = () => {
   const classes = useStyles()
 
   return (
-    <div className={classes.root}>
-      <ExButton variant='contained' color='primary'>
-        Create Users
-      </ExButton>
-    </div>
+    <Wrapper className={classes.root}>
+      <Wrapper className={classes.title}>
+        <Typography variant='h4' color='primary' style={{ fontFamily: 'comfortaa, sans-serif' }}>
+          box User Register
+        </Typography>
+      </Wrapper>
+      <Wrapper>
+        <ExButton variant='contained' color='primary'>
+        CREATE USERS
+        </ExButton>
+      </Wrapper>
+    </Wrapper>
   )
 }
 

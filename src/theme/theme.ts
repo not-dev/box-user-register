@@ -1,25 +1,28 @@
+import 'typeface-roboto'
+import 'typeface-comfortaa'
+
 import { createMuiTheme } from '@material-ui/core'
-import { grey, orange, red, teal } from '@material-ui/core/colors'
+import { amber, grey, red } from '@material-ui/core/colors'
 
 const theme = createMuiTheme({
   palette: {
     type: 'light', // dark
     primary: {
-      main: teal[500]
+      main: '#0061D5'
     },
     secondary: {
-      main: orange[600]
+      main: amber.A400
     },
     error: {
-      main: red.A400
+      main: red[500]
     },
     text: {
       primary: grey.A400, // 300
       secondary: grey[700] // 500
     },
     background: {
-      paper: grey[100], // 800
-      default: grey[200] // A400
+      paper: grey[50], // 800
+      default: grey[100] // A400
     },
     common: {
       black: grey.A400,
