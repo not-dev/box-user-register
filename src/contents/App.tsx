@@ -2,7 +2,7 @@ import { CssBaseline } from '@material-ui/core'
 import { createStyles, makeStyles, styled, StylesProvider, Theme, ThemeProvider } from '@material-ui/core/styles'
 import React from 'react'
 
-import { Dropzone, Menu } from '../contents'
+import { Dropzone, Menu, Table } from '../contents'
 import { theme } from '../theme'
 
 const Wrapper = styled('div')({
@@ -14,7 +14,8 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
   root: {
     width: '100vw',
     height: '100vh',
-    padding: theme.spacing(5)
+    padding: theme.spacing(5),
+    overflowX: 'hidden'
   },
   menu: {
     ...theme.mixins.toolbar,
@@ -27,8 +28,10 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
 
 const App:React.FC = () => {
   const classes = useStyles({ theme })
-  const blank:Array<Array<string>> = []
-  const [records, setRecords] = React.useState(blank)
+  const blankRecords:Array<Array<string>> = []
+  const blankUserJsons:Array<{username:string, email:string}> = []
+  const [records, setRecords] = React.useState(blankRecords)
+  const [userJsons, setUserJsons] = React.useState(blankUserJsons)
 
   return (
     <StylesProvider injectFirst>
@@ -36,10 +39,13 @@ const App:React.FC = () => {
         <CssBaseline />
         <Wrapper className={classes.root}>
           <Wrapper className={classes.menu}>
-            <Menu disabled={(records.length === 0)}/>
+            <Menu records={records} setUserJsons={setUserJsons}/>
           </Wrapper>
           <Wrapper className={classes.dropzone}>
-            <Dropzone setRecords={setRecords}/>
+            {records.length !== 0
+              ? <Table userJsons={userJsons}/>
+              : <Dropzone setRecords={setRecords}/>
+            }
           </Wrapper>
         </Wrapper>
       </ThemeProvider>

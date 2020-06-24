@@ -62,26 +62,28 @@ const Dropzone:React.FC<DZProps> = (props) => {
   const [loading, setLoading] = React.useState(false)
 
   const dropHandle = (acceptedFiles: Array<File>) => {
-    setLoading(true)
-    acceptedFiles.forEach((file:File) => {
-      const reader = new FileReader()
+    if (acceptedFiles.length !== 0) {
+      setLoading(true)
+      acceptedFiles.forEach((file:File) => {
+        const reader = new FileReader()
 
-      const callback: Callback = (err, records) => {
-        if (err) {
-          console.error(err)
-        } else {
-          console.log(records)
-          props.setRecords(records)
-          setLoading(false)
+        const callback: Callback = (err, records) => {
+          if (err) {
+            console.error(err)
+          } else {
+            console.log(records)
+            props.setRecords(records)
+            setLoading(false)
+          }
         }
-      }
 
-      reader.onload = () => {
-        const input = reader.result as string
-        parse(input, callback)
-      }
-      reader.readAsBinaryString(file)
-    })
+        reader.onload = () => {
+          const input = reader.result as string
+          parse(input, callback)
+        }
+        reader.readAsBinaryString(file)
+      })
+    }
   }
 
   return (
