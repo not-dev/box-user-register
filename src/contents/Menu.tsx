@@ -23,7 +23,11 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
   }
 }))
 
-const Menu:React.FC = () => {
+type MProps = {
+  disabled: boolean
+}
+
+const Menu:React.FC<MProps> = (props) => {
   const classes = useStyles()
 
   return (
@@ -34,7 +38,7 @@ const Menu:React.FC = () => {
         </Typography>
       </Wrapper>
       <Wrapper>
-        <ExButton variant='contained' color='primary'>
+        <ExButton variant='contained' color='primary' disabled={props.disabled}>
         CREATE USERS
         </ExButton>
       </Wrapper>

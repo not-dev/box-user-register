@@ -1,24 +1,25 @@
 
-import { Paper, Typography } from '@material-ui/core'
+import { Backdrop, CircularProgress, Paper, Typography } from '@material-ui/core'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline'
 import BlockIcon from '@material-ui/icons/Block'
 import clsx from 'clsx'
+import parse, { Callback } from 'csv-parse'
 import React from 'react'
 import ReactDropzone, { DropzoneState } from 'react-dropzone'
 
 const useStyles = makeStyles((theme:Theme) => createStyles({
   root: {
-    display: 'flex',
-    flex: 1,
     padding: theme.spacing(2)
   },
-  base: {
-    flex: 1,
+  flexbox: {
     display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+    height: '100%'
+  },
+  base: {
     borderWidth: 3,
     borderRadius: theme.shape.borderRadius,
     borderColor: theme.palette.divider,
@@ -32,46 +33,65 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
       { duration: theme.transitions.duration.short }
     ),
     '&:hover': {
+      color: theme.palette.text.primary,
       backgroundColor: theme.palette.action.hover
     }
   },
   accepted: {
+    color: theme.palette.text.primary,
     borderColor: theme.palette.info.main,
     backgroundColor: theme.palette.action.focus
   },
   rejected: {
+    color: theme.palette.text.primary,
     borderColor: theme.palette.error.main,
     backgroundColor: theme.palette.action.disabledBackground
+  },
+  backdrop: {
+    zIndex: theme.zIndex.modal,
+    color: theme.palette.common.white
   }
 }))
 
-const Dropzone:React.FC = () => {
-  const classes = useStyles()
+type DZProps = {
+  setRecords: (records:Array<Array<string>>) => void
+}
 
-  const callback = (acceptedFiles: Array<File>) => {
+const Dropzone:React.FC<DZProps> = (props) => {
+  const classes = useStyles()
+  const [loading, setLoading] = React.useState(false)
+
+  const dropHandle = (acceptedFiles: Array<File>) => {
+    setLoading(true)
     acceptedFiles.forEach((file:File) => {
       const reader = new FileReader()
 
-      reader.onabort = () => console.log('file reading was aborted')
-      reader.onerror = () => console.log('file reading has failed')
-      reader.onload = () => {
-        console.log('file')
-        // Do whatever you want with the file contents
-        const binaryStr = reader.result
-        console.log(binaryStr)
+      const callback: Callback = (err, records) => {
+        if (err) {
+          console.error(err)
+        } else {
+          console.log(records)
+          props.setRecords(records)
+          setLoading(false)
+        }
       }
-      reader.readAsArrayBuffer(file)
+
+      reader.onload = () => {
+        const input = reader.result as string
+        parse(input, callback)
+      }
+      reader.readAsBinaryString(file)
     })
   }
 
   return (
-    <Paper className={classes.root}>
+    <Paper className={clsx(classes.root, classes.flexbox)}>
       <ReactDropzone
-        onDrop={(acceptedFiles: Array<File>) => callback(acceptedFiles)}
+        onDrop={(acceptedFiles: Array<File>) => dropHandle(acceptedFiles)}
         accept='.csv, application/vnd.ms-excel'
       >
         {({ isDragAccept, isDragReject, getRootProps, getInputProps }:DropzoneState) => (
-          <div {...getRootProps({ className: clsx(classes.base, isDragAccept && classes.accepted, isDragReject && classes.rejected) })}>
+          <div {...getRootProps({ className: clsx(classes.flexbox, classes.base, isDragAccept && classes.accepted, isDragReject && classes.rejected) })}>
             <input {...getInputProps()} />
             {isDragReject ? (
               <BlockIcon fontSize='inherit'/>
@@ -80,12 +100,15 @@ const Dropzone:React.FC = () => {
                 <AddCircleOutlineIcon fontSize='inherit'/>
               )
                 : <Typography variant='h4' color='inherit'>
-                  Drag 'n' drop some files here, or click to select files
+                    Drag 'n' drop some files here, or click to select files
                 </Typography>
             }
           </div>
         )}
       </ReactDropzone>
+      <Backdrop className={classes.backdrop} open={loading}>
+        <CircularProgress color='inherit' size={64}/>
+      </Backdrop>
     </Paper>
   )
 }

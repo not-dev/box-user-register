@@ -27,6 +27,8 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
 
 const App:React.FC = () => {
   const classes = useStyles({ theme })
+  const blank:Array<Array<string>> = []
+  const [records, setRecords] = React.useState(blank)
 
   return (
     <StylesProvider injectFirst>
@@ -34,10 +36,10 @@ const App:React.FC = () => {
         <CssBaseline />
         <Wrapper className={classes.root}>
           <Wrapper className={classes.menu}>
-            <Menu/>
+            <Menu disabled={(records.length === 0)}/>
           </Wrapper>
           <Wrapper className={classes.dropzone}>
-            <Dropzone/>
+            <Dropzone setRecords={setRecords}/>
           </Wrapper>
         </Wrapper>
       </ThemeProvider>
