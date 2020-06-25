@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
 
 type MProps = {
   disabled: boolean
+  deleteAll: () => void
 }
 
 const Menu:React.FC<MProps> = (props) => {
@@ -47,6 +48,9 @@ const Menu:React.FC<MProps> = (props) => {
           </Typography>
         </Wrapper>
         <Wrapper>
+          <ExButton variant='contained' color='default' onClick={props.deleteAll}>
+            DELETE DATA
+          </ExButton>
           <ExButton variant='contained' color='primary' disabled={props.disabled} onClick={() => { setConfirm(true) }}>
             CREATE USERS
           </ExButton>

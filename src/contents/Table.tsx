@@ -47,7 +47,7 @@ const Table:React.FC<TProps> = (props) => {
             value={props.selector.username}
             onChange={(e) => props.setSelector({ ...props.selector, username: Number(e.target.value) })}
           >
-            {[...Array(props.records[0].length)].map((_, i) => {
+            {[...Array(props.records[0]?.length)].map((_, i) => {
               return (
                 <MenuItem value={i} key={`username-${i}`}>{i}</MenuItem>
               )
@@ -61,7 +61,7 @@ const Table:React.FC<TProps> = (props) => {
             value={props.selector.email}
             onChange={(e) => props.setSelector({ ...props.selector, email: Number(e.target.value) })}
           >
-            {[...Array(props.records[0].length)].map((_, i) => {
+            {[...Array(props.records[0]?.length)].map((_, i) => {
               return (
                 <MenuItem value={i} key={`email-${i}`}>{i}</MenuItem>
               )

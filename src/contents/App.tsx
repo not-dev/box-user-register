@@ -31,12 +31,18 @@ const App:React.FC = () => {
 
   const blankRecords:Array<Array<string>> = []
   const blankUserJsons:Array<{username:string, email:string}> = []
+
   const [records, setRecords] = React.useState(blankRecords)
   const [userJsons, setUserJsons] = React.useState(blankUserJsons)
 
   const [selector, setSelector] = React.useState({
     skipFirst: true, username: 0, email: 1
   })
+
+  const deleteAll = () => {
+    setUserJsons(blankUserJsons)
+    setRecords(blankRecords)
+  }
 
   React.useEffect(() => {
     const userJsons = records.slice(selector.skipFirst ? 1 : 0).map((row) => {
@@ -53,7 +59,7 @@ const App:React.FC = () => {
         <CssBaseline />
         <Wrapper className={classes.root}>
           <Wrapper className={classes.menu}>
-            <Menu disabled={userJsons.length === 0}/>
+            <Menu disabled={userJsons.length === 0} deleteAll={deleteAll}/>
           </Wrapper>
           <Wrapper className={classes.dropzone}>
             {records.length !== 0
