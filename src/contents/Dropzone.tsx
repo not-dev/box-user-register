@@ -3,8 +3,11 @@ import { Backdrop, CircularProgress, Paper, Typography } from '@material-ui/core
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline'
 import BlockIcon from '@material-ui/icons/Block'
+import arrayBufferToBuffer from 'arraybuffer-to-buffer'
 import clsx from 'clsx'
-import parse, { Callback } from 'csv-parse'
+import csvParse, { Callback } from 'csv-parse'
+import iconv from 'iconv-lite'
+import jschardet from 'jschardet'
 import React from 'react'
 import ReactDropzone, { DropzoneState } from 'react-dropzone'
 
@@ -64,24 +67,21 @@ const Dropzone:React.FC<DZProps> = (props) => {
   const dropHandle = (acceptedFiles: Array<File>) => {
     if (acceptedFiles.length !== 0) {
       setLoading(true)
-      acceptedFiles.forEach((file:File) => {
-        const reader = new FileReader()
+      acceptedFiles.forEach(async (file:File) => {
+        const arrayBuffer = await file.arrayBuffer()
+        const buffer = arrayBufferToBuffer(arrayBuffer)
+        const encoding = jschardet.detect(buffer).encoding === 'UTF-8' ? 'utf8' : 'shift-jis'
+        const str = iconv.decode(buffer, encoding)
 
         const callback: Callback = (err, records) => {
           if (err) {
             console.error(err)
           } else {
-            console.log(records)
-            props.setRecords(records)
             setLoading(false)
+            props.setRecords(records)
           }
         }
-
-        reader.onload = () => {
-          const input = reader.result as string
-          parse(input, callback)
-        }
-        reader.readAsBinaryString(file)
+        csvParse(str, callback)
       })
     }
   }

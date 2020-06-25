@@ -28,10 +28,24 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
 
 const App:React.FC = () => {
   const classes = useStyles({ theme })
+
   const blankRecords:Array<Array<string>> = []
   const blankUserJsons:Array<{username:string, email:string}> = []
   const [records, setRecords] = React.useState(blankRecords)
   const [userJsons, setUserJsons] = React.useState(blankUserJsons)
+
+  const [selector, setSelector] = React.useState({
+    skipFirst: true, username: 0, email: 1
+  })
+
+  React.useEffect(() => {
+    const userJsons = records.slice(selector.skipFirst ? 1 : 0).map((row) => {
+      return (
+        { username: row[selector.username], email: row[selector.email] }
+      )
+    })
+    setUserJsons(userJsons)
+  }, [records, selector.email, selector.skipFirst, selector.username, setUserJsons])
 
   return (
     <StylesProvider injectFirst>
@@ -39,11 +53,11 @@ const App:React.FC = () => {
         <CssBaseline />
         <Wrapper className={classes.root}>
           <Wrapper className={classes.menu}>
-            <Menu records={records} setUserJsons={setUserJsons}/>
+            <Menu disabled={userJsons.length === 0}/>
           </Wrapper>
           <Wrapper className={classes.dropzone}>
             {records.length !== 0
-              ? <Table userJsons={userJsons}/>
+              ? <Table records={records} selector={selector} setSelector={setSelector}/>
               : <Dropzone setRecords={setRecords}/>
             }
           </Wrapper>
