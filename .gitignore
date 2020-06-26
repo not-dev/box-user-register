@@ -18,6 +18,7 @@
 *.tmp
 build/
 temp/
+*boxapi.json
 
 # Logs
 logs

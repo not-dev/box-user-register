@@ -1,6 +1,6 @@
 import {
   FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Paper, Select, Switch,
-  Table as MuiTable, TableBody, TableCell, TableContainer, TableHead, TableRow
+  Table as MuiTable, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow
 } from '@material-ui/core/'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import React from 'react'
@@ -20,18 +20,33 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
   }
 }))
 
+type Selector = {
+  skipFirst: boolean,
+  username: number,
+  email: number
+}
+
 type TProps = {
   records: Array<Array<string>>
-  selector: {
-    skipFirst: boolean,
-    username: number,
-    email: number
-  }
+  selector: Selector
   setSelector: (selector:TProps['selector']) => void
 }
 
 const Table:React.FC<TProps> = (props) => {
   const classes = useStyles()
+
+  const [records, setRecords] = React.useState(props.records)
+
+  const [page, setPage] = React.useState(0)
+  const [rowsPerPage] = React.useState(10)
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage)
+  }
+
+  React.useEffect(() => {
+    setRecords(props.records.slice(props.selector.skipFirst ? 1 : 0))
+    setPage(0)
+  }, [props.records, props.selector])
 
   return (
     <React.Fragment>
@@ -78,19 +93,33 @@ const Table:React.FC<TProps> = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {props.records.slice(props.selector.skipFirst ? 1 : 0).map((row) => (
-              <TableRow key={row[props.selector.username]}>
-                <TableCell>
-                  {row[props.selector.username]}
-                </TableCell>
-                <TableCell>{row[props.selector.email]}</TableCell>
-              </TableRow>
-            ))}
+            {records.slice(page * rowsPerPage,
+              page * rowsPerPage + rowsPerPage).map((row, i) => {
+              return (
+                <TableRow key={`${page}-${i}`}>
+                  <TableCell>
+                    {row[props.selector.username]}
+                  </TableCell>
+                  <TableCell>
+                    {row[props.selector.email]}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </MuiTable>
       </TableContainer>
+      <TablePagination
+        component='div'
+        count={records.length}
+        rowsPerPage={rowsPerPage}
+        rowsPerPageOptions={[10]}
+        page={page}
+        onChangePage={handleChangePage}
+      />
     </React.Fragment>
   )
 }
 
 export { Table }
+export type { Selector }

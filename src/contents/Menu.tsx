@@ -27,17 +27,14 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
 }))
 
 type MProps = {
-  disabled: boolean
+  disabled: boolean,
+  execute: () => void,
   deleteAll: () => void
 }
 
 const Menu:React.FC<MProps> = (props) => {
   const classes = useStyles()
   const [confirm, setConfirm] = React.useState(false)
-
-  const run = () => {
-    alert('実行しました(仮)')
-  }
 
   return (
     <React.Fragment>
@@ -65,6 +62,7 @@ const Menu:React.FC<MProps> = (props) => {
         <DialogTitle className={classes.dialogTitle}>Warning</DialogTitle>
         <DialogContent>
           <DialogContentText>
+            この操作は取り消せません<br/>
             実行しますか？
           </DialogContentText>
         </DialogContent>
@@ -72,7 +70,7 @@ const Menu:React.FC<MProps> = (props) => {
           <Button onClick={() => setConfirm(false)} color='primary' autoFocus>
             CANCEL
           </Button>
-          <Button onClick={() => { setConfirm(false); run() }} color='primary'>
+          <Button onClick={() => { setConfirm(false); props.execute() }} color='primary'>
             OK
           </Button>
         </DialogActions>

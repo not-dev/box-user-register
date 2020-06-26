@@ -1,9 +1,10 @@
-import { CssBaseline } from '@material-ui/core'
+import { Backdrop, CircularProgress, CssBaseline } from '@material-ui/core'
 import { createStyles, makeStyles, styled, StylesProvider, Theme, ThemeProvider } from '@material-ui/core/styles'
 import React from 'react'
 
-import { Dropzone, Menu, Table } from '../contents'
+import { Dropzone, Menu, Selector, Table } from '../contents'
 import { theme } from '../theme'
+import { asyncFunc, boxAddUser, boxGetClient } from '../utility'
 
 const Wrapper = styled('div')({
   display: 'flex',
@@ -23,35 +24,54 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
   },
   dropzone: {
     flex: 1
+  },
+  backdrop: {
+    zIndex: theme.zIndex.modal,
+    color: theme.palette.common.white
   }
 }))
+
+type userJson = {
+  username:string,
+  email:string
+}
 
 const App:React.FC = () => {
   const classes = useStyles({ theme })
 
   const blankRecords:Array<Array<string>> = []
-  const blankUserJsons:Array<{username:string, email:string}> = []
 
   const [records, setRecords] = React.useState(blankRecords)
-  const [userJsons, setUserJsons] = React.useState(blankUserJsons)
 
-  const [selector, setSelector] = React.useState({
-    skipFirst: true, username: 0, email: 1
+  const [running, setRunning] = React.useState(false)
+  const [progress, setProgress] = React.useState(0)
+
+  const [selector, setSelector] = React.useState<Selector>({
+    skipFirst: true,
+    username: 0,
+    email: 1
   })
 
   const deleteAll = () => {
-    setUserJsons(blankUserJsons)
     setRecords(blankRecords)
   }
 
-  React.useEffect(() => {
-    const userJsons = records.slice(selector.skipFirst ? 1 : 0).map((row) => {
-      return (
-        { username: row[selector.username], email: row[selector.email] }
-      )
+  const executeSync = () => {
+    setRunning(true)
+    const client = boxGetClient()
+    const length = selector.skipFirst ? records.length - 1 : records.length
+    const step = 100 / length
+    records.slice(selector.skipFirst ? 1 : 0).forEach((row, i) => {
+      const userJson:userJson = { username: row[selector.username], email: row[selector.email] }
+      boxAddUser(client, userJson)
+      setProgress(step * (i + 1))
     })
-    setUserJsons(userJsons)
-  }, [records, selector.email, selector.skipFirst, selector.username, setUserJsons])
+  }
+
+  const execute = async () => {
+    await asyncFunc(executeSync)
+    setRunning(false)
+  }
 
   return (
     <StylesProvider injectFirst>
@@ -59,7 +79,7 @@ const App:React.FC = () => {
         <CssBaseline />
         <Wrapper className={classes.root}>
           <Wrapper className={classes.menu}>
-            <Menu disabled={userJsons.length === 0} deleteAll={deleteAll}/>
+            <Menu disabled={records.length === 0} deleteAll={deleteAll} execute={execute}/>
           </Wrapper>
           <Wrapper className={classes.dropzone}>
             {records.length !== 0
@@ -68,6 +88,9 @@ const App:React.FC = () => {
             }
           </Wrapper>
         </Wrapper>
+        <Backdrop className={classes.backdrop} open={running}>
+          <CircularProgress color='inherit' size={64} variant='static' value={progress}/>
+        </Backdrop>
       </ThemeProvider>
     </StylesProvider>
   )

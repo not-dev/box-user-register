@@ -3,13 +3,15 @@ import { Backdrop, CircularProgress, Paper, Typography } from '@material-ui/core
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline'
 import BlockIcon from '@material-ui/icons/Block'
-import arrayBufferToBuffer from 'arraybuffer-to-buffer'
 import clsx from 'clsx'
-import csvParse, { Callback } from 'csv-parse'
+import parseAsync from 'csv-parse'
 import iconv from 'iconv-lite'
 import jschardet from 'jschardet'
 import React from 'react'
 import ReactDropzone, { DropzoneState } from 'react-dropzone'
+
+const util = require('util')
+const parse = util.promisify(parseAsync)
 
 const useStyles = makeStyles((theme:Theme) => createStyles({
   root: {
@@ -56,6 +58,8 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
   }
 }))
 
+type Records = Array<Array<string>>
+
 type DZProps = {
   setRecords: (records:Array<Array<string>>) => void
 }
@@ -64,7 +68,8 @@ const Dropzone:React.FC<DZProps> = (props) => {
   const classes = useStyles()
   const [loading, setLoading] = React.useState(false)
 
-  const dropHandle = (acceptedFiles: Array<File>) => {
+  /*
+  const dropHandleSync = (acceptedFiles: Array<File>) => {
     if (acceptedFiles.length !== 0) {
       setLoading(true)
       acceptedFiles.forEach(async (file:File) => {
@@ -85,6 +90,38 @@ const Dropzone:React.FC<DZProps> = (props) => {
       })
     }
   }
+  */
+
+  const loadfile = async (acceptedFiles: Array<File>) => {
+    setLoading(true)
+    const input:Array<string> = []
+    await Promise.all(
+      acceptedFiles.map(async (file:File) => {
+        const reader = file.stream().getReader()
+        const readChunk = async (read:ReadableStreamReadResult<any>) => {
+          if (read.done) {
+            console.log('done')
+            return
+          }
+          const buffer = Buffer.from(read.value)
+          const encoding = jschardet.detect(buffer).encoding === 'UTF-8' ? 'utf8' : 'shift-jis'
+          input.push(iconv.decode(buffer, encoding))
+          await readChunk(await reader.read())
+        }
+        await readChunk(await reader.read())
+      })
+    )
+    return input.join('')
+  }
+
+  const dropHandle = async (acceptedFiles: Array<File>) => {
+    const input = await loadfile(acceptedFiles)
+    const records:Records = await parse(input, {
+      trim: true
+    })
+    setLoading(false)
+    props.setRecords(records)
+  }
 
   return (
     <Paper className={clsx(classes.root, classes.flexbox)}>
@@ -102,7 +139,7 @@ const Dropzone:React.FC<DZProps> = (props) => {
                 <AddCircleOutlineIcon fontSize='inherit'/>
               )
                 : <Typography variant='h4' color='inherit'>
-                    Drag 'n' drop some files here, or click to select files
+                    Drag & Drop CSV File or Click Here.
                 </Typography>
             }
           </div>

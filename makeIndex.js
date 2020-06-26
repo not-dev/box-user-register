@@ -3,7 +3,8 @@ const fs = require('fs')
 // index作成対象のディレクトリ
 const targetDirs = [
   './src/contents',
-  './src/theme'
+  './src/theme',
+  './src/utility'
 ]
 
 // 拡張子
