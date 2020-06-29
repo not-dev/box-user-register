@@ -1,11 +1,11 @@
 {
-  "name": "react-template",
-  "version": "0.1.0",
-  "description": "Template repository for React project",
+  "name": "box-user-register",
+  "version": "1.0.0",
+  "description": "Box user register",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/not-dev/react-template.git"
+    "url": "https://github.com/not-dev/box-user-register"
   },
   "homepage": ".",
   "dependencies": {
