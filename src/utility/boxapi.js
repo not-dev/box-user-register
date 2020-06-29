@@ -10,6 +10,7 @@ const boxGetClient = () => {
       resolve(client)
     } catch (e) {
       if (e.code === 'MODULE_NOT_FOUND') {
+        console.log('Config Not Found')
         reject(Error('Config Not Found'))
       }
     }

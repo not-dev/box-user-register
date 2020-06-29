@@ -79,6 +79,7 @@ const App:React.FC = () => {
     const client = await boxGetClient().catch((err) => {
       _log.error.push({ status: err.toString() })
     })
+    console.log(client)
     await records.slice(selector.skipFirst ? 1 : 0).reduce((acc, cur) => {
       const promise = async (row:Array<string>) => {
         const userJson:userJson = { username: row[selector.username], email: row[selector.email] }
@@ -88,7 +89,7 @@ const App:React.FC = () => {
             failed++
             _log.error.push({ ...userJson, status: err.toString() })
           })
-          _log.success.push({ ...userJson, status: res.toString() })
+          _log.success.push({ ...userJson, status: res })
           console.log(`done-${userJson.username}`)
         } else {
           console.log(`Invalid email-${userJson.username}`)
