@@ -1,5 +1,6 @@
-import { Button, CircularProgress, Grow, Typography } from '@material-ui/core'
+import { Button, CircularProgress, Grow, IconButton, Typography } from '@material-ui/core'
 import { createStyles, makeStyles, styled, Theme, useTheme } from '@material-ui/core/styles'
+import CloseIcon from '@material-ui/icons/Close'
 import DoneIcon from '@material-ui/icons/Done'
 import React from 'react'
 
@@ -17,7 +18,7 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
     width: '100vw'
   },
   icon: {
-    flex: 3,
+    flex: 5,
     fontSize: 160,
     justifyContent: 'flex-end',
     padding: theme.spacing(2)
@@ -44,8 +45,15 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
     padding: theme.spacing(4)
   },
   action: {
-    flex: 2,
+    flex: 3,
     justifyContent: 'flex-start'
+  },
+  close: {
+    color: theme.palette.common.white,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    padding: theme.spacing(2)
   }
 }))
 
@@ -84,13 +92,18 @@ const Done:React.FC<DProps> = (props) => {
       </Wrapper>
       <Wrapper className={classes.msg}>
         <Typography variant='h4' color='inherit'>
-          {props.status}
+          {props.status || '-' }
         </Typography>
       </Wrapper>
       <Wrapper className={classes.action}>
-        <Button variant='text' color='inherit' onClick={props.action}>
-          DOWNLOAD LOG
+        <Button variant='text' size='small' color='inherit' onClick={props.action}>
+          SAVE LOG
         </Button>
+      </Wrapper>
+      <Wrapper>
+        <IconButton className={classes.close} onClick={() => { window.location.reload() }}>
+          <CloseIcon fontSize='large' color='inherit'/>
+        </IconButton>
       </Wrapper>
     </Wrapper>
   )

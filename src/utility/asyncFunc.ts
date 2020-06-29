@@ -6,10 +6,10 @@ const asyncFunc = (func:(...args:any) => any) => {
     .catch(err => console.error(err))
 }
 
-const sleep = (s: number) => {
+const sleep = (sec: number) => {
   console.log('sleeping')
   return new Promise((resolve) => {
-    setTimeout(resolve, s / 1000)
+    setTimeout(resolve, sec * 1000)
   })
 }
 

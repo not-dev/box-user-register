@@ -1,5 +1,5 @@
 
-import { Backdrop, Box, CircularProgress, Paper, Typography } from '@material-ui/core'
+import { Backdrop, Box, CircularProgress, Paper, Snackbar, Typography } from '@material-ui/core'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline'
 import BlockIcon from '@material-ui/icons/Block'
@@ -9,7 +9,7 @@ import parseAsync from 'csv-parse'
 import iconv from 'iconv-lite'
 import jschardet from 'jschardet'
 import React from 'react'
-import ReactDropzone, { DropzoneState } from 'react-dropzone'
+import ReactDropzone, { DropzoneState, FileRejection } from 'react-dropzone'
 
 const util = require('util')
 const parse = util.promisify(parseAsync)
@@ -56,6 +56,11 @@ const useStyles = makeStyles((theme:Theme) => createStyles({
   backdrop: {
     zIndex: theme.zIndex.modal,
     color: theme.palette.common.white
+  },
+  snackbar: {
+    color: theme.palette.common.black,
+    backgroundColor: theme.palette.secondary.main,
+    fontSize: 16
   }
 }))
 
@@ -68,58 +73,44 @@ type DZProps = {
 const Dropzone:React.FC<DZProps> = (props) => {
   const classes = useStyles()
   const [loading, setLoading] = React.useState(false)
-
-  /*
-  const dropHandleSync = (acceptedFiles: Array<File>) => {
-    if (acceptedFiles.length !== 0) {
-      setLoading(true)
-      acceptedFiles.forEach(async (file:File) => {
-        const arrayBuffer = await file.arrayBuffer()
-        const buffer = arrayBufferToBuffer(arrayBuffer)
-        const encoding = jschardet.detect(buffer).encoding === 'UTF-8' ? 'utf8' : 'shift-jis'
-        const str = iconv.decode(buffer, encoding)
-
-        const callback: Callback = (err, records) => {
-          if (err) {
-            console.error(err)
-          } else {
-            setLoading(false)
-            props.setRecords(records)
-          }
-        }
-        csvParse(str, callback)
-      })
-    }
-  }
-  */
+  const [reject, setReject] = React.useState<boolean|string>(false)
 
   const loadfile = async (acceptedFiles: Array<File>) => {
     setLoading(true)
-    const input:Array<string> = []
+    const inputs:Array<Array<string>> = acceptedFiles.map(() => [])
     await Promise.all(
-      acceptedFiles.map(async (file:File) => {
+      acceptedFiles.map(async (file:File, i) => {
         const reader = file.stream().getReader()
         const readChunk = async (read:ReadableStreamReadResult<any>) => {
           if (read.done) {
-            console.log('done')
+            console.log('loaded')
             return
           }
           const buffer = Buffer.from(read.value)
           const encoding = jschardet.detect(buffer).encoding === 'UTF-8' ? 'utf8' : 'shift-jis'
-          input.push(iconv.decode(buffer, encoding))
+          inputs[i].push(iconv.decode(buffer, encoding))
           await readChunk(await reader.read())
         }
         await readChunk(await reader.read())
       })
     )
-    return input.join('')
+    return inputs.map((input) => input.join(''))
   }
 
   const dropHandle = async (acceptedFiles: Array<File>) => {
-    const input = await loadfile(acceptedFiles)
-    const records:Records = await parse(input, {
-      trim: true
-    })
+    const inputs = await loadfile(acceptedFiles)
+    const multiRecords = await Promise.all(
+      inputs.map(async (input) => {
+        const records:Records = await parse(input, {
+          trim: true
+        })
+        return records
+      })
+    )
+    const records = multiRecords.reduce((acc, cur) => {
+      acc.push(...cur)
+      return acc
+    }, [])
     setLoading(false)
     props.setRecords(records)
   }
@@ -127,8 +118,10 @@ const Dropzone:React.FC<DZProps> = (props) => {
   return (
     <Paper className={clsx(classes.root, classes.flexbox)}>
       <ReactDropzone
-        onDrop={(acceptedFiles: Array<File>) => dropHandle(acceptedFiles)}
+        onDropAccepted={(acceptedFiles: Array<File>) => dropHandle(acceptedFiles)}
+        onDropRejected={(f:FileRejection[]) => setReject(f[0].errors[0].message)}
         accept='.csv, application/vnd.ms-excel'
+        multiple={false}
       >
         {({ isDragAccept, isDragReject, getRootProps, getInputProps }:DropzoneState) => (
           <div {...getRootProps({ className: clsx(classes.flexbox, classes.base, isDragAccept && classes.accepted, isDragReject && classes.rejected) })}>
@@ -154,6 +147,18 @@ const Dropzone:React.FC<DZProps> = (props) => {
       <Backdrop className={classes.backdrop} open={loading}>
         <CircularProgress color='inherit' size={64}/>
       </Backdrop>
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        open={Boolean(reject)}
+        onClose={() => setReject(false)}
+        message={reject}
+        autoHideDuration={4000}
+        ContentProps={{
+          classes: {
+            root: classes.snackbar
+          }
+        }}
+      />
     </Paper>
   )
 }

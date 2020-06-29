@@ -6,7 +6,7 @@ import React from 'react'
 
 import { Done, Dropzone, Menu, Selector, Table } from '../contents'
 import { theme } from '../theme'
-import { asyncFunc, boxAddUser, boxGetClient } from '../utility'
+import { boxAddUser, boxGetClient, sleep } from '../utility'
 
 const Wrapper = styled('div')({
   display: 'flex',
@@ -38,6 +38,15 @@ type userJson = {
   email:string
 }
 
+type logJson = {
+  success:Array<{
+    [key:string]: string
+  }>,
+  error:Array<{
+    [key:string]: string
+  }>
+}
+
 const App:React.FC = () => {
   const classes = useStyles({ theme })
 
@@ -55,48 +64,51 @@ const App:React.FC = () => {
   })
 
   const [status, setStatus] = React.useState<string|boolean>(false)
-  const [log, setLog] = React.useState([])
+  const [log, setLog] = React.useState<logJson>({ success: [], error: [] })
 
   const deleteAll = () => {
     setRecords(blankRecords)
   }
 
-  const executeSync = () => {
-    setRunning(true)
-    const client = boxGetClient()
-    const length = selector.skipFirst ? records.length - 1 : records.length
-    const step = 100 / length
-    let stat = 0
-    const log:Array<{[k:string]:string}> = []
-    if (client) {
-      records.slice(selector.skipFirst ? 1 : 0).forEach((row, i) => {
-        const userJson:userJson = { username: row[selector.username], email: row[selector.email] }
-        if (validate(userJson.email)) {
-          const res = boxAddUser(client, userJson)
-          if (res === true) {
-            stat++
-            log.push({ ...userJson, log: 'Success' })
-          } else {
-            log.push({ ...userJson, log: 'Invalid email' })
-          }
-        } else {
-          log.push({ ...userJson, log: 'Invalid email' })
-        }
-        setProgress(step * (i + 1))
-      })
-    }
-    return { status: `${stat} / ${length}`, log: log }
-  }
-
   const execute = async () => {
-    const res = await asyncFunc(executeSync)
+    setRunning(true)
+    const length = selector.skipFirst ? records.length - 1 : records.length
+    let failed = 0
+    let step = 0
+    const _log: logJson = { success: [], error: [] }
+    const client = await boxGetClient().catch((err) => {
+      _log.error.push({ status: err.toString() })
+    })
+    await records.slice(selector.skipFirst ? 1 : 0).reduce((acc, cur) => {
+      const promise = async (row:Array<string>) => {
+        const userJson:userJson = { username: row[selector.username], email: row[selector.email] }
+        console.log(`run-${userJson.username}`)
+        if (validate(userJson.email)) {
+          const res = await boxAddUser(client, userJson).catch((err) => {
+            failed++
+            _log.error.push({ ...userJson, status: err.toString() })
+          })
+          _log.success.push({ ...userJson, status: res.toString() })
+          console.log(`done-${userJson.username}`)
+        } else {
+          console.log(`Invalid email-${userJson.username}`)
+          failed++
+          _log.error.push({ ...userJson, status: 'Invalid email' })
+        }
+        await sleep(0.06) // Box api limit: 1000call / min -> 0.06sec / call
+        step++
+        setProgress(step / length * 100)
+      }
+      return acc.then(() => promise(cur))
+    }, Promise.resolve())
+    console.log('done')
     setRunning(false)
-    setLog(res.log)
-    setStatus(res.status)
+    setLog(_log)
+    setStatus(`${length - failed} / ${length}`)
   }
 
   const download = () => {
-    fileDownload(JSON.stringify(log), 'box-user-register.log')
+    fileDownload(JSON.stringify(log, null, 2), 'box-user-register.log')
     console.log(log)
   }
 

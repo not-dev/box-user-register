@@ -25,7 +25,7 @@ const theme = createMuiTheme({
       default: grey[100] // A400
     },
     common: {
-      black: grey.A400,
+      black: grey[900],
       white: grey[50]
     }
   },
