@@ -1,11 +1,15 @@
 const BoxSDK = require('box-node-sdk')
-const config = require('../boxapi.json')
 
 const boxGetClient = () => {
-  const sdk = BoxSDK.getPreconfiguredInstance(config)
-  const client = sdk.getAppAuthClient('enterprise')
-  console.log(client)
-  return client
+  try {
+    const config = require('../boxapi.json')
+    const sdk = BoxSDK.getPreconfiguredInstance(config)
+    const client = sdk.getAppAuthClient('enterprise')
+    console.log(client)
+    return client
+  } catch (e) {
+    return false
+  }
 }
 
 const boxAddUser = (client, userJson) => {
@@ -15,6 +19,7 @@ const boxAddUser = (client, userJson) => {
       .err(err => console.log(err))
     */
   console.log(userJson.email, userJson.username)
+  return true
 }
 
 export { boxGetClient, boxAddUser }

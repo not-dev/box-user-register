@@ -1,8 +1,9 @@
 
-import { Backdrop, CircularProgress, Paper, Typography } from '@material-ui/core'
+import { Backdrop, Box, CircularProgress, Paper, Typography } from '@material-ui/core'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline'
 import BlockIcon from '@material-ui/icons/Block'
+import PublishIcon from '@material-ui/icons/Publish'
 import clsx from 'clsx'
 import parseAsync from 'csv-parse'
 import iconv from 'iconv-lite'
@@ -138,9 +139,14 @@ const Dropzone:React.FC<DZProps> = (props) => {
               : isDragAccept ? (
                 <AddCircleOutlineIcon fontSize='inherit'/>
               )
-                : <Typography variant='h4' color='inherit'>
-                    Drag & Drop CSV File or Click Here.
-                </Typography>
+                : (
+                  <Box display='flex' flexDirection='column'>
+                    <Box display='flex' justifyContent='center'><PublishIcon fontSize='inherit'/></Box>
+                    <Typography variant='h4' color='inherit'>
+                        Drag & Drop CSV File or Click Here.
+                    </Typography>
+                  </Box>
+                )
             }
           </div>
         )}

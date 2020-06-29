@@ -70,9 +70,9 @@ const Table:React.FC<TProps> = (props) => {
           </Select>
         </FormControl>
         <FormControl variant='outlined' className={classes.selector}>
-          <InputLabel>e-mail</InputLabel>
+          <InputLabel>email</InputLabel>
           <Select
-            label='e-mail'
+            label='email'
             value={props.selector.email}
             onChange={(e) => props.setSelector({ ...props.selector, email: Number(e.target.value) })}
           >
@@ -89,7 +89,7 @@ const Table:React.FC<TProps> = (props) => {
           <TableHead>
             <TableRow>
               <TableCell>username</TableCell>
-              <TableCell>e-mail</TableCell>
+              <TableCell>email</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

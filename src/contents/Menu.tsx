@@ -3,7 +3,8 @@ import { createStyles, makeStyles, styled, Theme } from '@material-ui/core/style
 import React from 'react'
 
 const ExButton = styled(Button)(({ theme }) => ({
-  margin: theme.spacing(1)
+  margin: theme.spacing(1),
+  width: 120
 }))
 
 const Wrapper = styled('div')({
@@ -45,11 +46,11 @@ const Menu:React.FC<MProps> = (props) => {
           </Typography>
         </Wrapper>
         <Wrapper>
-          <ExButton variant='contained' color='default' onClick={props.deleteAll}>
-            DELETE DATA
+          <ExButton variant='contained' color='default' disabled={props.disabled} onClick={props.deleteAll}>
+            CLEAR
           </ExButton>
           <ExButton variant='contained' color='primary' disabled={props.disabled} onClick={() => { setConfirm(true) }}>
-            CREATE USERS
+            SUBMIT
           </ExButton>
         </Wrapper>
       </Wrapper>
