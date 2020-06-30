@@ -73,7 +73,7 @@ const App:React.FC = () => {
   const execute = async () => {
     setRunning(true)
     const length = selector.skipFirst ? records.length - 1 : records.length
-    let failed = 0
+    let success = 0
     let step = 0
     const _log: logJson = { success: [], error: [] }
     const client = await boxGetClient().catch((err) => {
@@ -85,15 +85,16 @@ const App:React.FC = () => {
         const userJson:userJson = { username: row[selector.username], email: row[selector.email] }
         console.log(`run-${userJson.username}`)
         if (validate(userJson.email)) {
-          const res = await boxAddUser(client, userJson).catch((err) => {
-            failed++
+          await boxAddUser(client, userJson).then((res) => {
+            success++
+            _log.success.push({ ...userJson, status: res })
+          }).catch((err) => {
+            console.error(err)
             _log.error.push({ ...userJson, status: err.toString() })
           })
-          _log.success.push({ ...userJson, status: res })
           console.log(`done-${userJson.username}`)
         } else {
           console.log(`Invalid email-${userJson.username}`)
-          failed++
           _log.error.push({ ...userJson, status: 'Invalid email' })
         }
         await sleep(0.06) // Box api limit: 1000call / min -> 0.06sec / call
@@ -105,7 +106,7 @@ const App:React.FC = () => {
     console.log('done')
     setRunning(false)
     setLog(_log)
-    setStatus(`${length - failed} / ${length}`)
+    setStatus(`${success} / ${length}`)
   }
 
   const download = () => {

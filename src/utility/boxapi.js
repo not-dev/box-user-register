@@ -1,20 +1,12 @@
 const BoxSDK = require('box-node-sdk')
 
-const boxGetClient = () => {
-  return new Promise((resolve, reject) => {
-    try {
-      const config = require('../boxapi.json')
-      const sdk = BoxSDK.getPreconfiguredInstance(config)
-      const client = sdk.getAppAuthClient('enterprise')
-      console.log(client)
-      resolve(client)
-    } catch (e) {
-      if (e.code === 'MODULE_NOT_FOUND') {
-        console.log('Config Not Found')
-        reject(Error('Config Not Found'))
-      }
-    }
-  })
+const boxGetClient = async () => {
+  const response = await fetch(process.env.PUBLIC_URL + '/boxapi.json')
+  const config = await response.json()
+  const sdk = BoxSDK.getPreconfiguredInstance(config)
+  const client = sdk.getAppAuthClient('enterprise')
+  console.log(client)
+  return client
 }
 
 const boxAddUser = (client, userJson) => {
@@ -23,7 +15,7 @@ const boxAddUser = (client, userJson) => {
     if (client) {
       client.enterprise.addUser(userJson.email, userJson.username)
         .then(res => {
-          console.log(`Success {name: ${res.name}, login: ${res.login}}`)
+          console.log(`Success-${res.name}`)
           resolve(res)
         })
         .err(err => {
