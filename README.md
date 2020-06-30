@@ -4,7 +4,7 @@ box APIでCSVからユーザー登録を行う
 
 ## Usage
 
-* boxから公開鍵と秘密鍵のペアを含むJsonファイルを取得
+* box developer consoleから公開鍵と秘密鍵のペアを含むJsonファイルを取得
 * publicフォルダにboxapi.jsonという名前で配置
 * 起動して、ユーザー名とメールアドレスを含むcsvをドラッグアンドドロップする
 * SUBMITボタンで実行
